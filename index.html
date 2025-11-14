@@ -18,7 +18,7 @@
   html, body { height: 100%; }
   body {
     margin: 0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: var(--text);
     line-height: 1.6;
     background: var(--bg);
@@ -72,17 +72,15 @@
   section[hidden] { display:none; }
 
   /* Gate modal (uses <dialog>) */
-  dialog::backdrop { background: rgba(0,0,0,.45); }
-  dialog {
-    border: none; padding: 0; border-radius: 14px; box-shadow: var(--shadow); width: min(90vw, 420px);
-  }
-  .modal { background: #fff; padding: 18px 18px 16px; border-radius: 14px; }
-  .modal h3 { margin: 4px 0 6px; font-size: 1.25rem; }
-  .modal .row { margin-top: 12px; }
-  .error { color: #b42318; font-size: .95rem; margin-top: 8px; min-height: 1.2em; }
+  dialog { border: none; padding: 0; border-radius: 16px; box-shadow: var(--shadow); }
+  dialog::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(2px); }
+  .modal { background: #fff; border-radius: 16px; width: min(92vw, 440px); padding: 18px 18px 20px; }
+  .modal h3 { margin: 0 0 8px; font-size: 1.1rem; }
+  .modal .row { grid-template-columns: 1fr auto; }
+  .err { color: #b42318; font-size: .9rem; min-height: 1.1em; }
 
   /* Countdown */
-  .time { font-variant-numeric: tabular-nums; font-size: clamp(2.2rem, 6vw, 3rem); font-weight: 750; letter-spacing: .5px; color: #0f172a; text-align: center; }
+  .time { font-variant-numeric: tabular-nums; font-size: clamp(2rem, 7vw, 3.75rem); font-weight: 750; letter-spacing: .5px; color: #0f172a; text-align: center; }
 
   /* Finale */
   #finale .inner { text-align: center; color: #fff; }
@@ -93,8 +91,14 @@
 
   /* Tiny footer helper */
   .meta { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 8px; }
+
+  /* --- minimal centering helpers --- */
+  #countdown { text-align: center; }              /* centers heading + text on countdown */
+  #finaleBtn { display: block; margin: 12px auto; } /* centers “Rohan, are you ready?” */
+  #showHint  { display: block; margin: 12px auto !important; } /* centers “View hint” on Clue 3 */
 </style>
 </head>
+
 <body>
 <canvas id="pix" aria-hidden="true"></canvas>
 <main>
@@ -112,7 +116,7 @@
   <!-- CLUE 1 -->
   <section id="clue1" data-theme="clue1" class="card" role="region" aria-labelledby="c1-title" hidden>
     <h2 id="c1-title">Clue 1</h2>
-    <p>“Our chosen place to eat, where the name drops the ° to zero and our cheesy jars became a thing.”</p>
+    <p>“Our favorite cafe with mini croissants. What’s its name?”</p>
     <form id="form1" class="row" autocomplete="off">
       <label for="a1" class="visually-hidden">Your answer</label>
       <input id="a1" name="a1" type="text" inputmode="text" placeholder="Type answer" required />
@@ -121,17 +125,17 @@
     <p id="msg1" class="meta" role="status" aria-live="polite"></p>
   </section>
 
-  <!-- GATE (modal) -->
+  <!-- GATE (between Clue 1 and Clue 2) -->
   <dialog id="gate">
-    <div class="modal">
-      <h3>Did you meet Rohan? Enter the 4-digit code.</h3>
-      <form id="gateForm" class="row" method="dialog" autocomplete="off" novalidate>
-        <label for="code" class="visually-hidden">4-digit code</label>
-        <input id="code" name="code" type="tel" inputmode="numeric" placeholder="0000" maxlength="4" aria-describedby="gateErr" />
-        <button id="gateBtn" class="btn" type="submit" disabled>Unlock</button>
-      </form>
-      <div id="gateErr" class="error" role="alert" aria-live="assertive"></div>
-    </div>
+    <form id="gateForm" method="dialog" class="modal" autocomplete="off">
+      <h3>Enter the 4-digit code</h3>
+      <div class="row">
+        <label class="visually-hidden" for="code">4-digit code</label>
+        <input id="code" name="code" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="0000" maxlength="4" />
+        <button id="gateBtn" class="btn" type="submit" disabled>Open</button>
+      </div>
+      <p id="gateErr" class="err" role="status" aria-live="polite"></p>
+    </form>
   </dialog>
 
   <!-- CLUE 2 -->
@@ -150,7 +154,7 @@
   <section id="clue3" data-theme="clue3" class="card" role="region" aria-labelledby="c3-title" hidden>
     <h2 id="c3-title">Clue 3</h2>
     <p>“This past roommate of mine has had a spicy love story in his life.”</p>
-    <button class="btn" id="showHint" type="button" style="margin-top:6px; margin-bottom:8px; background: linear-gradient(180deg,#ff8c3c,#e35200); box-shadow: 0 6px 16px rgba(227,82,0,.25);">View hint</button>
+    <button class="btn" id="showHint" type="button" style="margin-top:10px;background:linear-gradient(180deg,#ff8a00,#fe5600);box-shadow:0 6px 16px rgba(227,82,0,.25);">View hint</button>
     <p id="hint" class="hint" hidden>he’s coming to our wedding.</p>
 
     <form id="form3" class="row" autocomplete="off">
@@ -167,30 +171,44 @@
     <p class="meta">Tick-tock… the treasure awaits.</p>
     <div class="time" id="clock">13:00</div>
     <button id="finaleBtn" class="btn" type="button" hidden>Rohan, are you ready?</button>
-    <p id="cdNote" class="meta"></p>
   </section>
 
   <!-- FINALE -->
-  <section id="finale" data-theme="finale" role="region" aria-labelledby="fn-title" hidden>
-    <div class="inner card" style="background: rgba(10,12,20,.6); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.12);">
-      <h1 id="fn-title">Happy life together, you two</h1>
-      <div class="swans" aria-label="Two swans facing each other">
-        <span class="swan" role="img" aria-label="swan">🦢</span>
-        <span class="swan mirror" role="img" aria-label="swan mirrored">🦢</span>
+  <section id="finale" data-theme="finale" class="card" role="region" aria-labelledby="fin-title" hidden style="background:transparent;color:#fff;">
+    <div class="inner">
+      <h1 id="fin-title">You did it!</h1>
+      <div class="swans">
+        <span class="swan">🦢</span>
+        <span>❤</span>
+        <span class="swan mirror">🦢</span>
       </div>
-      <p class="meta" style="color:#cbd5e1;">With love and fireworks ✨</p>
+      <p class="meta" style="color:#e2e8f0">Forever starts now.</p>
     </div>
   </section>
+
+  <p class="meta">© Rohan</p>
 </main>
 
 <script>
-(function(){
-  // --- Utilities ---
-  const $ = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+(() => {
+  const $  = (s, el=document)=> el.querySelector(s);
+  const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
   const normalize = (s) => (s || '').trim().toLowerCase().replace(/\s+/g,' ');
   const pix = document.getElementById('pix');
   const ctx = pix.getContext('2d');
+  // --- Background images for specific screens (served from /assets on GitHub Pages) ---
+  const BG_SOURCES = {
+    clue1:     'assets/pixel-cafe.png',
+    clue2:     'assets/pixel-gurdwara.png',
+    clue3:     'assets/pixel-bangalore-map.png',
+    countdown: 'assets/pixel-time.png'
+  };
+  const BG_IMAGES = {};
+  for (const [key, src] of Object.entries(BG_SOURCES)) {
+    const img = new Image();
+    img.src = src;            // same origin when hosted on GitHub Pages
+    BG_IMAGES[key] = img;
+  }
   ctx.imageSmoothingEnabled = false;
   let activeTheme = 'home';
   // Adjustable countdown minutes via URL: ?m=1 sets 1 minute for testing
@@ -225,6 +243,22 @@
   function drawPixelBackground(theme){
     // Draw using 8x8 block tiles, tiled across viewport
     const w = pix.width, h = pix.height;
+
+    // If a mapped background image exists for this theme, draw it scaled to cover
+    const img = BG_IMAGES[theme];
+    if (img) {
+      if (img.complete && img.naturalWidth) {
+        const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight); // cover
+        const dw = Math.ceil(img.naturalWidth * scale);
+        const dh = Math.ceil(img.naturalHeight * scale);
+        const dx = Math.floor((w - dw) / 2);
+        const dy = Math.floor((h - dh) / 2);
+        ctx.drawImage(img, dx, dy, dw, dh);
+        return;
+      } else {
+        img.addEventListener('load', () => { drawActiveTheme(); }, { once: true });
+      }
+    }
     const px = 8 * Math.max(1, Math.floor(Math.min(w,h) / 320)); // scale pixel size a bit with screen
     const cols = Math.ceil(w / px), rows = Math.ceil(h / px);
 
@@ -238,56 +272,44 @@
     };
 
     // helpers
-    const fill = (x,y,color)=>{ ctx.fillStyle = color; ctx.fillRect(x*px, y*px, px, px); };
+    function fill(x,y,color){
+      ctx.fillStyle = color;
+      const xx = x*px, yy = y*px;
+      ctx.fillRect(xx,yy,px,px);
+    }
 
     if(theme === 'home'){
+      // subtle parchment dots
       ctx.fillStyle = palettes.home.base; ctx.fillRect(0,0,w,h);
-      // subtle sand grain
-      for(let y=0; y<rows; y++){
-        for(let x=0; x<cols; x++){
-          if(((x+y)&7)===0) fill(x,y,'#f6e2b9');
+      for (let y=0; y<rows; y++){
+        for (let x=0; x<cols; x++){
+          if(Math.random()<0.08) fill(x,y, palettes.home.dot);
         }
-      }
-      // dotted path via a random walk
-      let x = 2, y = Math.floor(rows/3);
-      for(let i=0;i<cols*2;i++){
-        fill(x,y,palettes.home.dot);
-        if(Math.random()<0.6) fill(x+1,y,palettes.home.dot);
-        x += 1; y += (Math.random()<0.4?1:(Math.random()<0.5?-1:0));
-        y = Math.max(1, Math.min(rows-2, y));
-      }
-      // a few treasure markers
-      for(let i=0;i<12;i++){
-        const rx = Math.floor(Math.random()*cols), ry = Math.floor(Math.random()*rows);
-        if((rx+ry)%5===0) fill(rx,ry,palettes.home.accent);
       }
       return;
     }
 
     if(theme === 'clue1'){
-      // Indigo → peach blocky gradient
-      for(let y=0; y<rows; y++){
-        for(let x=0; x<cols; x++){
-          const t = (y/rows)*1.0 + (x/cols)*0.1;
-          let c; if(t<0.45) c = palettes.clue1.a; else if(t<0.62) c = palettes.clue1.b; else if(t<0.78) c = palettes.clue1.c; else c = palettes.clue1.d;
-          fill(x,y,c);
-        }
+      // warm dusk gradient with sparkles
+      const g = ctx.createLinearGradient(0,0,0,h);
+      g.addColorStop(0,palettes.clue1.a);
+      g.addColorStop(1,palettes.clue1.b);
+      ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+      for(let i=0; i<Math.floor(cols*rows*0.02); i++){
+        const rx = Math.floor(Math.random()*cols);
+        const ry = Math.floor(Math.random()*rows);
+        fill(rx,ry, Math.random()<0.5?palettes.clue1.c:palettes.clue1.d);
       }
       return;
     }
 
     if(theme === 'clue2'){
+      // map-paper vibe
       ctx.fillStyle = palettes.clue2.base; ctx.fillRect(0,0,w,h);
-      // soft gold stripes/motifs
       for(let y=0; y<rows; y++){
-        if(y%6===0) for(let x=0; x<cols; x++) fill(x,y,palettes.clue2.line);
-      }
-      for(let y=2; y<rows; y+=6){
-        for(let x=0; x<cols; x+=8){
-          fill(x+3,y,palettes.clue2.gold);
-          fill(x+4,y,palettes.clue2.gold);
-          fill(x+3,y+1,palettes.clue2.gold);
-          fill(x+4,y+1,palettes.clue2.gold);
+        for(let x=0; x<cols; x++){
+          if((x+y)%7===0) fill(x,y,palettes.clue2.line);
+          if(Math.random()<0.02) fill(x,y,palettes.clue2.gold);
         }
       }
       return;
@@ -335,14 +357,13 @@
   }
   window.addEventListener('resize', () => { drawActiveTheme(); });
 
-  // --- Fireworks (pixel-style) ---
-  let fwAnim = null;
+  // Simple fireworks for finale
+  const particles = [];
+  const mouse = { x: ()=> window.innerWidth/2, y: ()=> window.innerHeight/2 };
+  const w = ()=> pix.width, h = ()=> pix.height;
+  let rafId = null;
   function startFireworks(){
-    cancelFireworks();
-    activeTheme = 'finale';
-    drawActiveTheme();
-    const particles = [];
-    const w = () => pix.width, h = () => pix.height;
+    if(rafId) return;
     const px = 6 * Math.max(1, Math.floor(Math.min(w(),h()) / 400));
 
     function burst(cx, cy){
@@ -359,44 +380,43 @@
         });
       }
     }
-
-    let ticker = 0;
     function step(){
-      fwAnim = requestAnimationFrame(step);
-      // slight fade for trails
-      ctx.fillStyle = 'rgba(7,9,19,0.25)';
-      ctx.fillRect(0,0,w(),h());
-      // occasionally launch new bursts
-      if(ticker%25===0){
-        burst(Math.random()*w(), h()* (0.25 + Math.random()*0.5));
-      }
-      ticker++;
-      // update/draw particles in chunky pixels
-      const g = 0.98; // drag
-      const gy = 0.06 * px; // gravity
-      particles.forEach(p=>{
-        p.vx *= g; p.vy = p.vy * g + gy; p.x += p.vx; p.y += p.vy; p.age++;
-        const size = Math.max(px, px * (1 - p.age/p.life));
+      rafId = requestAnimationFrame(step);
+      clear();
+      drawPixelBackground('finale');
+      ctx.globalCompositeOperation = 'lighter';
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.age++;
+        p.x += p.vx*0.016; p.y += p.vy*0.016;
+        p.vy += 0.01 * px;
+        const t = 1 - (p.age/p.life);
+        ctx.globalAlpha = Math.max(0, t);
         ctx.fillStyle = p.color;
-        ctx.fillRect(Math.round(p.x/px)*px, Math.round(p.y/px)*px, size, size);
-      });
-      // cull
-      for(let i=particles.length-1;i>=0;i--) if(particles[i].age>particles[i].life) particles.splice(i,1);
+        ctx.fillRect(Math.floor(p.x), Math.floor(p.y), Math.max(1, Math.floor(px/3)), Math.max(1, Math.floor(px/3)));
+        if(p.age>=p.life) particles.splice(i,1);
+      }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+      if(Math.random() < 0.03) burst(Math.random()*w(), Math.random()*h()*0.8 + h()*0.1);
     }
     step();
   }
-  function cancelFireworks(){ if(fwAnim) { cancelAnimationFrame(fwAnim); fwAnim = null; } }
 
-  // --- Forms & logic ---
-  function wireForm(formId, inputId, btnId, expected, onPass){
+  // Forms wiring helpers
+  function wireForm(formId, inputId, submitId, expectedAnswer, onPass){
     const form = document.getElementById(formId);
     const input = document.getElementById(inputId);
-    const btn = document.getElementById(btnId);
-    const setBtn = () => btn.disabled = normalize(input.value)==='';
-    input.addEventListener('input', setBtn); setBtn();
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
+    const submit = document.getElementById(submitId);
+
+    input.addEventListener('input', ()=>{
+      const v = normalize(input.value);
+      submit.disabled = (v.length < 2);
+    });
+
+    form.addEventListener('submit', (ev)=>{
+      ev.preventDefault();
       const ans = normalize(input.value);
+      const expected = normalize(expectedAnswer);
       if(ans === expected){ onPass(); }
       else { const msg = form.nextElementSibling; if(msg) msg.textContent = 'Not quite – try again.'; input.focus(); }
     });
@@ -428,68 +448,32 @@
   // CLUE 2 → proceed
   wireForm('form2','a2','s2','bangla sahib', ()=>{ $('#msg2').textContent='Correct!'; go('#clue3'); });
 
-  // CLUE 3 → start countdown
-  document.getElementById('showHint').addEventListener('click', ()=>{ $('#hint').hidden = false; });
-  wireForm('form3','a3','s3','pranshu', ()=>{
-    $('#msg3').textContent='Correct! Starting countdown…';
-    startCountdown(true);
-    go('#countdown');
+  // CLUE 3 → proceed
+  document.getElementById('showHint').addEventListener('click', ()=>{
+    document.getElementById('hint').hidden = false;
   });
+  wireForm('form3','a3','s3','akshay', ()=>{ $('#msg3').textContent='Correct!'; go('#countdown'); startClock(); });
 
-  // --- Countdown with persistence ---
-  const CLOCK = $('#clock');
-  const FINALE_BTN = $('#finaleBtn');
-  let timer = null;
-  const KEY = 'treasure_deadline_ts';
-
-  function startCountdown(reset){
-    const now = Date.now();
-    let deadline = parseInt(localStorage.getItem(KEY)||'0',10);
-    if(reset || !deadline || deadline < now) {
-      deadline = now + COUNT_MINUTES*60*1000; // COUNT_MINUTES minutes
-      localStorage.setItem(KEY, String(deadline));
-    }
-    tick();
-    if(timer) clearInterval(timer);
-    timer = setInterval(tick, 250);
-
-    function tick(){
-      const t = Math.max(0, deadline - Date.now());
-      const mm = Math.floor(t/60000); const ss = Math.floor((t%60000)/1000);
-      CLOCK.textContent = `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
-      if(t<=0){
-        clearInterval(timer); timer = null; localStorage.removeItem(KEY);
-        $('#cdNote').textContent = 'Time\'s up!';
-        FINALE_BTN.hidden = false; FINALE_BTN.focus();
-      } else {
-        $('#cdNote').textContent = '';
-      }
+  // Countdown logic
+  const CLOCK = document.getElementById('clock');
+  const FINALE_BTN = document.getElementById('finaleBtn');
+  let countdownTimer = null;
+  function startClock(){
+    let t = Math.max(1, COUNT_MINUTES) * 60; // seconds
+    FINALE_BTN.hidden = true;
+    update();
+    countdownTimer = setInterval(()=>{
+      t--; update();
+      if(t<=0){ clearInterval(countdownTimer); FINALE_BTN.hidden = false; CLOCK.textContent = '00:00'; }
+    }, 1000);
+    function update(){
+      const m = Math.floor(t/60).toString().padStart(2,'0');
+      const s = Math.floor(t%60).toString().padStart(2,'0');
+      CLOCK.textContent = `${m}:${s}`;
     }
   }
 
-  // --- Reset on hard reload (always start at Clue 1) ---
-  function resetApp() {
-    // clear persisted countdown & timers
-    try { localStorage.removeItem(KEY); } catch(e) {}
-    if (timer) { clearInterval(timer); timer = null; }
-    cancelFireworks();
-
-    // close the gate dialog if open
-    const d = $('#gate');
-    if (d && (d.open || d.hasAttribute('open'))) {
-      try { d.close(); } catch(_) { d.removeAttribute('open'); }
-    }
-
-    // clear inputs/messages and UI bits
-    ['a1','a2','a3','code'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    ['msg1','msg2','msg3','gateErr','cdNote'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
-    const hint = $('#hint'); if (hint) hint.hidden = true;
-    ['s1','s2','s3','gateBtn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = true; });
-
-    // reset countdown UI
-    CLOCK.textContent = `${String(COUNT_MINUTES).padStart(2,'0')}:00`;
-    FINALE_BTN.hidden = true;
-
+  function resetApp(){
     // force start at Clue 1 without adding a history entry
     history.replaceState(null, '', '#clue1');
   }
